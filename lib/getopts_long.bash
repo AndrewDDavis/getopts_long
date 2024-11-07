@@ -22,6 +22,10 @@ getopts_long() {
 
     printf -v "${optvar}" "%s" "${OPTARG%%=*}"
 
+    # Handle '--'
+    # - suggested by fork of dodecatheon/getopts_long
+    #[[ "${!optvar}" != '-' ]] || return 1 
+
     if [[ "${optspec_long}" =~ (^|[[:space:]])${!optvar}:([[:space:]]|$) ]]; then
         OPTARG="${OPTARG#${!optvar}}"
         OPTARG="${OPTARG#=}"
