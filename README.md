@@ -25,17 +25,17 @@ Table of Content
 <!-- TOC START min:2 max:4 link:true asterisk:false update:true -->
 - [Table of Content](#table-of-content)
 - [Installation](#installation)
-  - [Source the library](#source-the-library)
-  - [Paste the content](#paste-the-content)
-  - [Run in docker](#run-in-docker)
+    - [Source the library](#source-the-library)
+    - [Paste the content](#paste-the-content)
+    - [Run in docker](#run-in-docker)
 - [Usage](#usage)
-  - [Extended OPTSPEC](#extended-optspec)
-  - [Example script](#example-script)
+    - [Extended OPTSPEC](#extended-optspec)
+    - [Example script](#example-script)
 - [How It Works](#how-it-works)
-  - [Internal variables](#internal-variables)
-  - [Error reporting](#error-reporting)
-    - [Verbose mode](#verbose-mode)
-    - [Silent mode](#silent-mode)
+    - [Internal variables](#internal-variables)
+    - [Error reporting](#error-reporting)
+        - [Verbose mode](#verbose-mode)
+        - [Silent mode](#silent-mode)
 <!-- TOC END -->
 
 ## Installation
@@ -109,8 +109,8 @@ where:
 
 An OPTSPEC string tells `getopts_long` which options to expect and which of them must have an argument. The syntax is very simple:
 
-- single-character options are named first (identical to the built-in `getopts`);
-- long options follow the single-character options, they are named as is and are separated from each other and the single-character options by a space.
+- Single-character options are named first, in the same format as for the built-in `getopts`.
+- Long options follow the single-character options, separated from each other and the single-character options by a space. If there are only long options, but no short ones, the OPTSPEC string must start with a space (or colon, see below).
 
 Just like with the original `getopts`, when you want `getopts_long` to expect an argument for an option, just place a `:` (colon) after the option.
 
@@ -133,31 +133,31 @@ A good example is worth a thousand words, so here is an example of how you could
 #!/usr/bin/env bash
 source "${PATH_TO_REPO}/lib/getopts_long.bash"
 
-while getopts_long ':af: all file:' OPTKEY; do
-    case ${OPTKEY} in
-        'a'|'all')
+while getopts_long ':af: all file:' OPT
+do
+    case $OPT in
+        ( a | all )
             echo 'all triggered'
             ;;
-        'f'|'file')
-            echo "file supplied -- ${OPTARG}"
+        ( f | file )
+            echo "file: $OPTARG"
             ;;
-        '?')
-            echo "INVALID OPTION -- ${OPTARG}" >&2
+        ( '?' )
+            echo >&2 "Invalid option: $OPTARG"
             exit 1
             ;;
-        ':')
-            echo "MISSING ARGUMENT for option -- ${OPTARG}" >&2
+        ( ':' )
+            echo >&2 "Missing argument for option $OPTARG"
             exit 1
             ;;
-        *)
-            echo "UNIMPLEMENTED OPTION -- ${OPTKEY}" >&2
+        ( * )
+            echo >&2 "Missing argument handler for $OPT"
             exit 1
             ;;
     esac
 done
 
 shift $(( OPTIND - 1 ))
-[[ "${1}" == "--" ]] && shift
 
 ...
 ```
@@ -179,7 +179,7 @@ while getopts ...; do
 done
 ```
 
-Identical to `getopts`, `getopts_long` will parse options and their possible arguments. It will stop parsing on the first non-option argument (a string that doesn't begin with a hyphen (`-`) that isn't an argument for any option in front of it). It will also stop parsing when it sees the `--` (double-hyphen), which means end of options.
+As with `getopts`, `getopts_long` will stop parsing on the first argument that doesn't begin with a hyphen (`-`), and that isn't an argument for an option preceding it. It will also stop parsing when it sees `--` (double-hyphen) alone as an argument, which indicates end of options. Note that the `--` argument would be shifted away along with the other options that were processed. If this is undesirable, a check can be performed before the shift, like `i=$((OPTIND-1)); [[ ${!i} == '--' ]] ...`.
 
 ### Internal variables
 
@@ -202,14 +202,14 @@ In production scripts I recommend using the silent mode, because it allows you t
 
 #### Verbose mode
 
-| Error type                  | What happens |
-| --------------------------- | ------------ |
-| invalid option              | `VARNAME` is set to `?` (question-mark) and `OPTARG` is unset. |
-| required argument not found | `VARNAME` is set to `?` (question-mark), `OPTARG` is unset and an _error message is printed_. |
+| Error type           | What happens                                          |
+| -------------------- | ----------------------------------------------------- |
+| invalid option       | `VARNAME` => `?`, `OPTARG` => unset                   |
+| required arg missing | `VARNAME` => `?`, `OPTARG` => unset, _error message printed_ |
 
 #### Silent mode
 
-| Error type                  | What happens |
-| --------------------------- | ------------ |
-| invalid option              | `VARNAME` is set to `?` (question-mark) and `OPTARG` is set to the (invalid) option character. |
-| required argument not found | `VARNAME` is set to `:` (colon) and `OPTARG` contains the option in question. |
+| Error type           | What happens                                   |
+| -------------------- | ---------------------------------------------- |
+| invalid option       | `VARNAME` => `?`, `OPTARG` => (invalid) option |
+| required arg missing | `VARNAME` => `:`, `OPTARG` => option           |
