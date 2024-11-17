@@ -1,7 +1,7 @@
-getopts_long()
-{
-    [[ $# -lt 2  ||  $1 == @(-h|--help) ]] &&
-    {
+getopts_long() {
+
+    [[ $# -lt 2  ||  $1 == @(-h|--help) ]] && {
+
         # print usage docs
         if [[ -n $( command -v docsh ) ]]
         then
