@@ -5,7 +5,7 @@ getopts_long() {
         # print usage docs
         if [[ -n $( command -v docsh ) ]]
         then
-            docsh -TD "Re-implemented getopts, with support for --long options.
+            docsh -TD """Re-implemented getopts, with support for --long options.
 
             Usage
 
@@ -48,7 +48,7 @@ getopts_long() {
 
             For more details on usage and error reporting, refer to the ReadMe doc:
             https://github.com/AndrewDDavis/getopts_long
-            "
+            """
         else
             : "${1:?Missing required parameter: long optspec}"
             : "${2:?Missing required parameter: variable name}"
